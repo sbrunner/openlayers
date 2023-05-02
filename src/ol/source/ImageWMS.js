@@ -2,24 +2,24 @@
  * @module ol/source/ImageWMS
  */
 
-import EventType from '../events/EventType.js';
-import ImageSource, {defaultImageLoadFunction} from './Image.js';
-import ImageWrapper from '../Image.js';
-import {DEFAULT_VERSION} from './wms.js';
-import {appendParams} from '../uri.js';
-import {assert} from '../asserts.js';
-import {calculateSourceResolution} from '../reproj.js';
-import {ceil, floor, round} from '../math.js';
-import {compareVersions} from '../string.js';
+import EventType from "../events/EventType.js";
+import ImageSource, { defaultImageLoadFunction } from "./Image.js";
+import ImageWrapper from "../Image.js";
+import { DEFAULT_VERSION } from "./wms.js";
+import { appendParams } from "../uri.js";
+import { assert } from "../asserts.js";
+import { calculateSourceResolution } from "../reproj.js";
+import { ceil, floor, round } from "../math.js";
+import { compareVersions } from "../string.js";
 import {
   containsExtent,
   getCenter,
   getForViewAndSize,
   getHeight,
   getWidth,
-} from '../extent.js';
-import {createCanvasContext2D} from '../dom.js';
-import {get as getProjection, transform} from '../proj.js';
+} from "../extent.js";
+import { createCanvasContext2D } from "../dom.js";
+import { get as getProjection, transform } from "../proj.js";
 
 /**
  * Number of decimal digits to consider in integer values when rounding.
@@ -198,19 +198,19 @@ class ImageWMS extends ImageSource {
     );
 
     const baseParams = {
-      'SERVICE': 'WMS',
-      'VERSION': DEFAULT_VERSION,
-      'REQUEST': 'GetFeatureInfo',
-      'FORMAT': 'image/png',
-      'TRANSPARENT': true,
-      'QUERY_LAYERS': this.params_['LAYERS'],
+      SERVICE: "WMS",
+      VERSION: DEFAULT_VERSION,
+      REQUEST: "GetFeatureInfo",
+      FORMAT: "image/png",
+      TRANSPARENT: true,
+      QUERY_LAYERS: this.params_["LAYERS"],
     };
     Object.assign(baseParams, this.params_, params);
 
     const x = floor((coordinate[0] - extent[0]) / resolution, DECIMALS);
     const y = floor((extent[3] - coordinate[1]) / resolution, DECIMALS);
-    baseParams[this.v13_ ? 'I' : 'X'] = x;
-    baseParams[this.v13_ ? 'J' : 'Y'] = y;
+    baseParams[this.v13_ ? "I" : "X"] = x;
+    baseParams[this.v13_ ? "J" : "Y"] = y;
 
     return this.getRequestUrl_(
       extent,
@@ -241,19 +241,19 @@ class ImageWMS extends ImageSource {
     }
 
     const baseParams = {
-      'SERVICE': 'WMS',
-      'VERSION': DEFAULT_VERSION,
-      'REQUEST': 'GetLegendGraphic',
-      'FORMAT': 'image/png',
+      SERVICE: "WMS",
+      VERSION: DEFAULT_VERSION,
+      REQUEST: "GetLegendGraphic",
+      FORMAT: "image/png",
     };
 
-    if (params === undefined || params['LAYER'] === undefined) {
+    if (params === undefined || params["LAYER"] === undefined) {
       const layers = this.params_.LAYERS;
       const isSingleLayer = !Array.isArray(layers) || layers.length === 1;
       if (!isSingleLayer) {
         return undefined;
       }
-      baseParams['LAYER'] = layers;
+      baseParams["LAYER"] = layers;
     }
 
     if (resolution !== undefined) {
@@ -261,7 +261,7 @@ class ImageWMS extends ImageSource {
         ? this.getProjection().getMetersPerUnit()
         : 1;
       const pixelSize = 0.00028;
-      baseParams['SCALE'] = (resolution * mpu) / pixelSize;
+      baseParams["SCALE"] = (resolution * mpu) / pixelSize;
     }
 
     Object.assign(baseParams, params);
@@ -331,11 +331,11 @@ class ImageWMS extends ImageSource {
     }
 
     const params = {
-      'SERVICE': 'WMS',
-      'VERSION': DEFAULT_VERSION,
-      'REQUEST': 'GetMap',
-      'FORMAT': 'image/png',
-      'TRANSPARENT': true,
+      SERVICE: "WMS",
+      VERSION: DEFAULT_VERSION,
+      REQUEST: "GetMap",
+      FORMAT: "image/png",
+      TRANSPARENT: true,
     };
     Object.assign(params, this.params_);
 
@@ -397,28 +397,28 @@ class ImageWMS extends ImageSource {
   getRequestUrl_(extent, size, pixelRatio, projection, params) {
     assert(this.url_ !== undefined, 9); // `url` must be configured or set using `#setUrl()`
 
-    params[this.v13_ ? 'CRS' : 'SRS'] = projection.getCode();
+    params[this.v13_ ? "CRS" : "SRS"] = projection.getCode();
 
-    if (!('STYLES' in this.params_)) {
-      params['STYLES'] = '';
+    if (!("STYLES" in this.params_)) {
+      params["STYLES"] = "";
     }
 
     if (pixelRatio != 1) {
       switch (this.serverType_) {
-        case 'geoserver':
+        case "geoserver":
           const dpi = (90 * pixelRatio + 0.5) | 0;
-          if ('FORMAT_OPTIONS' in params) {
-            params['FORMAT_OPTIONS'] += ';dpi:' + dpi;
+          if ("FORMAT_OPTIONS" in params) {
+            params["FORMAT_OPTIONS"] += ";dpi:" + dpi;
           } else {
-            params['FORMAT_OPTIONS'] = 'dpi:' + dpi;
+            params["FORMAT_OPTIONS"] = "dpi:" + dpi;
           }
           break;
-        case 'mapserver':
-          params['MAP_RESOLUTION'] = 90 * pixelRatio;
+        case "mapserver":
+          params["MAP_RESOLUTION"] = 90 * pixelRatio;
           break;
-        case 'carmentaserver':
-        case 'qgis':
-          params['DPI'] = 90 * pixelRatio;
+        case "carmentaserver":
+        case "qgis":
+          params["DPI"] = 90 * pixelRatio;
           break;
         default: // Unknown `serverType` configured
           assert(false, 8);
@@ -426,17 +426,17 @@ class ImageWMS extends ImageSource {
       }
     }
 
-    params['WIDTH'] = size[0];
-    params['HEIGHT'] = size[1];
+    params["WIDTH"] = size[0];
+    params["HEIGHT"] = size[1];
 
     const axisOrientation = projection.getAxisOrientation();
     let bbox;
-    if (this.v13_ && axisOrientation.substr(0, 2) == 'ne') {
+    if (this.v13_ && axisOrientation.substr(0, 2) == "ne") {
       bbox = [extent[1], extent[0], extent[3], extent[2]];
     } else {
       bbox = extent;
     }
-    params['BBOX'] = bbox.join(',');
+    params["BBOX"] = bbox.join(",");
 
     return appendParams(/** @type {string} */ (this.url_), params);
   }
@@ -490,8 +490,8 @@ class ImageWMS extends ImageSource {
    * @private
    */
   updateV13_() {
-    const version = this.params_['VERSION'] || DEFAULT_VERSION;
-    this.v13_ = compareVersions(version, '1.3') >= 0;
+    const version = this.params_["VERSION"] || DEFAULT_VERSION;
+    this.v13_ = compareVersions(version, "1.3") >= 0;
   }
 }
 
